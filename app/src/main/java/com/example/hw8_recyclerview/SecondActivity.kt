@@ -1,8 +1,10 @@
 package com.example.hw8_recyclerview
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -13,28 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class SecondActivity : AppCompatActivity() {
 
-    private val items = mutableListOf(
-        Item("Первые штаны","Просто штаны", R.drawable.pant1),
-        Item("Вторые штаны","Просто штаны", R.drawable.pant2),
-        Item("Третьи штаны","Любимые штаны", R.drawable.pant3),
-        Item("Четвёртые штаны","Просто штаны", R.drawable.pant4),
-        Item("Пятые штаны","Просто штаны", R.drawable.pant5),
-        Item("Шестые штаны","Просто штаны", R.drawable.pant6),
-        Item("Первая кофта","Просто кофта", R.drawable.jacket1),
-        Item("Вторая кофта","Просто кофта", R.drawable.jacket2),
-        Item("Третья кофта","Просто кофта", R.drawable.jacket3),
-        Item("Четвёртая кофта","Просто кофта", R.drawable.jacket4),
-        Item("Пятая кофта","Просто кофта", R.drawable.jacket5),
-        Item("Шестая кофта","Любимая кофта", R.drawable.jacket6),
-        Item("Первая обувь","Любимая обувь", R.drawable.shoes1),
-        Item("Вторая обувь","Просто обувь", R.drawable.shoes2),
-        Item("Третья обувь","Просто обувь", R.drawable.shoes3),
-        Item("Четвёртая обувь","Просто обувь", R.drawable.shoes4),
-        Item("Пятая обувь","Любимая обувь", R.drawable.shoes5),
-        Item("Шестая обувь","Просто обувь", R.drawable.shoes6),
-        Item("Первая шапка","Когда +- тепло", R.drawable.cap1),
-        Item("Вторая шапка","Когда похолоднее", R.drawable.cap2)
-    )
+    private val wardrobeDB = WardrobeDB()
+    private var items:MutableList<Item> = mutableListOf()
 
     private lateinit var toolbarTB: Toolbar
     private lateinit var recyclerRV: RecyclerView
@@ -51,16 +33,35 @@ class SecondActivity : AppCompatActivity() {
 
         init()
 
+    }
 
+    override fun onResume() {
+        super.onResume()
+        reInitAdapter()
+    }
+
+    private fun reInitAdapter(){
+        val adapter = CustomAdapter(items)
+        recyclerRV.adapter = adapter
+        recyclerRV.setHasFixedSize(true)
+        adapter.setOnItemClickListener(object:
+            CustomAdapter.OnItemClickListener {
+            override fun onItemClick(item: Item, position: Int) {
+                val intent = Intent(this@SecondActivity,InfoActivity::class.java)
+                intent.putExtra("index",position)
+                intent.putExtra("item",item)
+                startActivity(intent)
+            }
+        })
     }
 
     private fun init() {
+        items=wardrobeDB.getItems()
         toolbarTB = findViewById(R.id.toolbarTB)
         setSupportActionBar(toolbarTB)
-
         recyclerRV = findViewById(R.id.recyclerRV)
         recyclerRV.layoutManager = LinearLayoutManager(this@SecondActivity)
-        recyclerRV.adapter = CustomAdapter(items)
+        reInitAdapter()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -69,7 +70,7 @@ class SecondActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        finish()
+        finishAffinity()
         return super.onOptionsItemSelected(item)
     }
 }
